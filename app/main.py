@@ -4,7 +4,7 @@ from pathlib import Path
 from fastapi import FastAPI, APIRouter, Query, HTTPException, Request
 from fastapi.templating import Jinja2Templates
 
-from schemas import Recipe, RecipeCreate, RecipeSearchResults
+from app.schemas.recipe import Recipe, RecipeCreate, RecipeSearchResults
 from data import RECIPES
 
 BASE_PATH = Path(__file__).resolve().parent
