@@ -1,8 +1,14 @@
-from typing import Optional
+from typing import Optional, Any
+from pathlib import Path
 
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Query, HTTPException, Request
+from fastapi.templating import Jinja2Templates
+
 from schemas import Recipe, RecipeCreate, RecipeSearchResults
 from data import RECIPES
+
+BASE_PATH = Path(__file__).resolve().parent
+TEMPLATES = Jinja2Templates(directory=str(BASE_PATH / "templates"))
 
 app = FastAPI(
     title="Recipe API"
@@ -12,20 +18,27 @@ router = APIRouter()
 
 
 @router.get('/', status_code=200)
-def root() -> dict:
-    return {"msg": "root endpoint"}
+def root(request: Request):
+    return TEMPLATES.TemplateResponse(
+        "index.html",
+        {"request": request, "recipes": RECIPES},
+    )
 
 
-@router.get('/recipe/{recipe_id}', status_code=200)
-def get_recipe_by_id(*, recipe_id: int) -> dict:
+@router.get('/recipe/{recipe_id}', status_code=200, response_model=Recipe)
+def get_recipe_by_id(*, recipe_id: int) -> Any:
     result = [recipe for recipe in RECIPES if recipe['id'] == recipe_id]
-    if result:
-        return result[0]
+    if not result:
+        raise HTTPException(
+            status_code=404, detail=f"Recipe with ID {recipe_id} not found"
+        )
+
+    return result[0]
 
 
 @router.get('/search/', status_code=200)
 def search_recipe(
-        keyword: Optional[str] = None, max_results: Optional[int] = 10
+        keyword: Optional[str] = Query(None, min_length=3, example="chicken"), max_results: Optional[int] = 10
 ) -> dict:
     if keyword is None:
         return {'result': RECIPES[:max_results]}
