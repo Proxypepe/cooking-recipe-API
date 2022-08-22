@@ -1,20 +1,40 @@
 from pydantic import BaseModel
+
 from typing import Sequence
 
 
-class Recipe(BaseModel):
-    id: int
+class RecipeBase(BaseModel):
     label: str
     source: str
     url: str
 
 
-class RecipeSearchResults(BaseModel):
-    results: Sequence[Recipe]
-
-
-class RecipeCreate(BaseModel):
+class RecipeCreate(RecipeBase):
     label: str
     source: str
     url: str
     submitter_id: int
+
+
+class RecipeUpdate(RecipeBase):
+    label: str
+
+
+class RecipeInDBBase(RecipeBase):
+    id: int
+    submitter_id: int
+
+    class Config:
+        orm_mode = True
+
+
+class Recipe(RecipeInDBBase):
+    pass
+
+
+class RecipeInDB(RecipeInDBBase):
+    pass
+
+
+class RecipeSearchResults(BaseModel):
+    results: Sequence[Recipe]
