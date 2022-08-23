@@ -12,6 +12,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     email: EmailStr
+    password: str
 
 
 class UserUpdate(UserBase):
@@ -25,5 +26,9 @@ class UserInDBBase(UserBase):
         orm_mode = True
 
 
+class UserInDB(UserInDBBase):
+    hashed_password: str
+
+
 class User(UserInDBBase):
-    pass
+    ...
